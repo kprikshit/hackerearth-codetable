@@ -1,6 +1,12 @@
 #Mac extra files
 *.DS_Store
 
+#Intellij files
+*.idea/*
+
+#extra files
+codes/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

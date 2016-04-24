@@ -351,4 +351,9 @@ input[type=text]{
 #editor{
     position:relative;
     height:600px;
+    width: 100%;
+}
+
+.share-link-display{
+    padding-top: 5px;
 }
