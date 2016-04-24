@@ -5,6 +5,8 @@ from codetable.randomFileUrl import generateRandomString
 from languageExtension import *
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+import requests
+import json
 
 
 # Database related function
@@ -167,3 +169,17 @@ def save(request):
         print ex
         error = '{"ack:0", "msg": "error in saving file"}'
         return HttpResponse(error)
+
+@csrf_exempt
+def compile_run(request):
+    code_id = request.POST.get('id', '')
+    if code_id =='':
+        return HttpResponse("Empty Id received");
+
+    code_obj = get_from_database(code_id);
+
+    url = "https://api.hackerearth.com/v3/code/run/"
+    source = get_code_text(code_id, code_obj.code_lang)
+    data = {'client_secret': 'f8c321f549d832c1be38f82f0a26defc886cd079', 'source': source, 'lang': code_obj.code_lang}
+    response = requests.post(url, data = data);
+    return HttpResponse(str(response.json()))

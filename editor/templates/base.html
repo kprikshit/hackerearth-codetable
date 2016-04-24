@@ -82,11 +82,9 @@
                     </div>
                     <div class="clear"></div>
                 </div> <!-- compile and test -->
-                <div class="dots-loader"></div>
                 <div id="run-result" class="medium-margin body-font">
                     <div class="error-output"></div>
-                    <div class="output hidden" id="output">
-                    </div>
+                    <div class="output hidden" id="output"></div>
                 </div>
             </div><!-- left -->
             
@@ -200,6 +198,7 @@
     <!-- ajax related functions -->
     <script>
         function saveCode(code_id){
+            $("#save-code").text("Saving...");
             var editor = ace.edit("editor");
             var code_text = editor.session.getValue();
             var code_lang = $("#lang").val();
@@ -218,26 +217,22 @@
             })
         }
 
-        function compileAndRun(){
-            var editor = ace.edit("editor");
-            var data = editor.getValue();
-            var modes = editor.session.getMode().$id.split("/");
-            var lang = $("#lang").val();
-
-            $.getJSON({
-                type: 'POST',
-                dataType: 'json',
-                url: 'https://api.hackerearth.com/v3/code/run/',
-                data: {'client_secret': 'f8c321f549d832c1be38f82f0a26defc886cd079', 'source': data, 'lang': lang },
+        function compileAndRun(code_id){
+            saveCode(code_id);
+            $.ajax({
+                method: 'POST',
+                url: '/editor/run/',
+                data: {'id': code_id},
                 success: function(response){
                     console.log(response);
-                    $("#output").html($.parseJSON(response).html);
+                    $(".output").show();
+                    $(".output").html(response);
                 },
                 error: function(error){
                     $(".error-output").show();
                     $(".erorr-output").html(error);
                 }
-             })
+             });
         }
 
         function share(code_id){
@@ -275,23 +270,20 @@
     </script><!-- Ajax scripts -->
 
     <!-- Ace editor scripts -->
-    <script src= "{% static "src-noconflict/ace.js" %}" charset="utf-8"></script>
+    <script src= "{% static "src-noconflict/ace.js" %}"  type="text/javascript" charset="utf-8"></script>
     <script>
         $(document).ready(function(){
             self.setInterval(function(){
                 saveCode('{{ file_name }}');
                 $("#save-code").text("Saved!")
             }, 10000);
+
             var editor = ace.edit("editor");
             editor.setTheme("ace/theme/github");
-            editor.getSession().setUseWrapMode(true);
-            $("#editor").css('font-family', 'Courier New');
+            editor.getSession().setTabSize(1);
+            //editor.getSession().setUseSoftTabs(false);
 
-            editor.commands.addCommand({
-                name: 'saveCommand',
-                bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
-                exec: saveCode('{{ file_name }}'),
-            });
+            //$("#editor").css('font-family', 'Courier New');
 
             editor.on('change', function(){
                 $("#save-code").text("Save");
