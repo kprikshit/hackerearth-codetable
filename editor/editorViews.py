@@ -185,7 +185,7 @@ def generate_output_html(response, code_input):
         else:
             code_input = string.replace(code_input, "\n", "<br/>")
             htmlres = htmlres + "<div class='dark less-margin'>" + code_input
-        htmlres = htmlres + code_input + "</div></div>"
+        htmlres = htmlres + "</div></div>"
 
         # added run output
         htmlres = htmlres + "<div class='medium-margin'><div class='content-heading-bold'>Output:</div><hr/>"
