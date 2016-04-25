@@ -3,9 +3,11 @@ from django.template import loader
 from editor.models import Code
 from codetable.randomFileUrl import generateRandomString
 from languageExtension import *
+from constants import *
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 import requests
+import string
 import json
 
 
@@ -167,19 +169,76 @@ def save(request):
         return HttpResponse(str(save_time) );
     except Exception as ex:
         print ex
-        error = '{"ack:0", "msg": "error in saving file"}'
-        return HttpResponse(error)
+        return HttpResponse("error in saving file")
+
+
+def generate_output_html(response, code_input):
+    htmlres = "<div style='display:inline' class='content-heading-bold'>Compile Status: &nbsp;</div>"
+    htmlres = htmlres + response['compile_status'] + ""
+
+    compile_status = response['compile_status']
+    if compile_status == "OK":
+        # add run information
+        htmlres = htmlres + "<div class='medium-margin'><div class='content-heading-bold'>Input:</div><hr/>"
+        if code_input == "":
+            htmlres = htmlres + "<div class='light less-margin'>" + "Std Input is Empty"
+        else:
+            code_input = string.replace(code_input, "\n", "<br/>")
+            htmlres = htmlres + "<div class='dark less-margin'>" + code_input
+        htmlres = htmlres + code_input + "</div></div>"
+
+        # added run output
+        htmlres = htmlres + "<div class='medium-margin'><div class='content-heading-bold'>Output:</div><hr/>"
+        code_output = response['run_status']['output_html']
+        if code_output == "":
+            htmlres =  htmlres + "<div class='light less-margin'>" + "Std Output is Empty"
+        else:
+            htmlres = htmlres + "<div class='dark less-margin'>" + code_output
+        htmlres = htmlres + "</div></div>"
+
+        # added run memory information
+        htmlres = htmlres + "<div class='float-left col'>"
+        htmlres = htmlres + "<div class='content-heading-bold'>Memory Used(KB):</div>"
+        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
+            'memory_used'] + "</div></div>"
+
+        htmlres = htmlres + "<div class='float-left col'>"
+        htmlres = htmlres + "<div class='content-heading-bold'>Time taken (sec):</div>"
+        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
+            'time_used'] + "</div></div>"
+
+        htmlres = htmlres + "<div class='float-left col'>"
+        htmlres = htmlres + "<div class='content-heading-bold'>Status:</div>"
+        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
+            'status'] + "</div></div>"
+
+        htmlres = htmlres + "<div class='float-left col'>"
+        htmlres = htmlres + "<div class='content-heading-bold'>Status Detail:</div>"
+        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
+            'status_detail'] + "</div></div>"
+
+        htmlres = htmlres + "<div class='clear'></div>"
+    return htmlres
 
 @csrf_exempt
 def compile_run(request):
     code_id = request.POST.get('id', '')
+    code_input = request.POST.get('input', '');
     if code_id =='':
-        return HttpResponse("Empty Id received");
-
-    code_obj = get_from_database(code_id);
-
-    url = "https://api.hackerearth.com/v3/code/run/"
+        return HttpResponse("Empty Id received")
+    # get required information
+    code_obj = get_from_database(code_id)
     source = get_code_text(code_id, code_obj.code_lang)
-    data = {'client_secret': 'f8c321f549d832c1be38f82f0a26defc886cd079', 'source': source, 'lang': code_obj.code_lang}
-    response = requests.post(url, data = data);
-    return HttpResponse(str(response.json()))
+
+    if code_obj.code_lang == DEFAULT_TEXT_NAME:
+        return HttpResponse("Text file compile is not yet supported")
+    data = {'client_secret': API_CLIENT_SECRET_KEY, 'source': source, 'lang': code_obj.code_lang}
+    if code_input != "":
+        data['input'] = code_input
+
+
+    # Make the API request here
+    response = requests.post(API_RUN_URL, data = data).json()
+    # convert received json to a HTML format
+    output_html = generate_output_html(response, code_input)
+    return HttpResponse(output_html)

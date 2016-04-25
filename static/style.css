@@ -357,3 +357,32 @@ input[type=text]{
 .share-link-display{
     padding-top: 5px;
 }
+
+#run-result{
+    border: dotted;
+    border-color: #3a3f46;
+    border-width: thin;
+}
+
+#error-output{
+    margin:20px;
+}
+
+#output{
+    margin:20px;
+}
+
+.content-heading-bold {
+    color: #252c33;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.less-margin {
+    margin: 5px 0 0 0;
+}
+
+.col {
+    width: 15%;
+    margin: 20px 30px 0 0;
+}

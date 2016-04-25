@@ -15,6 +15,9 @@ class Code(models.Model):
         self.create_date = timezone.now()
         self.code_name = code_id;
         self.save()
-        
+
+    def Code(self):
+        self.create_date = timezone.now();
+
     def __str__(self):
         return self.code_name

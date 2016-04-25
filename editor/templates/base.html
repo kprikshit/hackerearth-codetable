@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
         -->
         <link rel="stylesheet" href="{% static "style.css" %}">
+        <title>{{file_name }}-Codetable Test</title>
     </head>
     <body>
         <div class="header">
@@ -17,8 +18,10 @@
                 </div>
                 <ul class="nav-bar no-padding float-right">
                     <li><a href="/">New Code</a></li>
+                    <!--
                     <li><a href="/" target="_blank">Do Something</a></li>
                     <li><a href="/" target="_blank">FU</a></li>
+                    -->
                  </ul>
                  <div class="clear"></div>
             </div>
@@ -39,7 +42,7 @@
                     </form>
                 </div>
                 <div class="float-right less-margin-left delete-digest-code">
-                    <a onclick="delete_digest_code('{{ file_name }}'); return false;" class="delete">Delete</a>
+                    <a onclick="delete_code('{{ file_name }}'); return false;" class="delete">Delete</a>
                 </div>
                 <div class="clear"></div>
             </div><!-- filename div -->
@@ -78,13 +81,13 @@
                 </div><!-- test-input-check-->
                 <div class="compile-and-test">
                     <div class="float-right medium-margin-left">
-                        <button type="button" id="run-code" class="button btn-green" onclick="compileAndRun('{{ file_name }}')">Compile and Run</button>
+                        <button type="button" id="run-code" class="button btn-green" onclick="saveCompileRun('{{ file_name }}')">Compile and Run</button>
                     </div>
                     <div class="clear"></div>
                 </div> <!-- compile and test -->
-                <div id="run-result" class="medium-margin body-font">
+                <div id="run-result" class="medium-margin body-font hidden">
                     <div class="error-output"></div>
-                    <div class="output hidden" id="output"></div>
+                    <div class="output" id="output"></div>
                 </div>
             </div><!-- left -->
             
@@ -99,7 +102,7 @@
                             <span class="date-created-value dark">{{ code_create_date }}</span>
                         </div>
                         <div class="date-last-saved">
-                            <span class="date-last-saved-msg">Last Modified:</span>
+                            <span class="date-last-saved-msg">Last Saved:</span>
                             <span class="date-last-saved-value dark">{{ code_last_save_date }}</span>
                         </div>
                     </div>
@@ -217,22 +220,36 @@
             })
         }
 
+        // this will save the code first and then it will run it
+        function saveCompileRun(code_id) {
+            while (1) {
+                saveCode(code_id);
+                break;
+            }
+            compileAndRun(code_id);
+        }
+
         function compileAndRun(code_id){
-            saveCode(code_id);
+            $("#run-result").show();
+            $(".output").html("Compiling....")
+            var code_input = $("#test-input").val();
+            console.log(code_input);
             $.ajax({
                 method: 'POST',
                 url: '/editor/run/',
-                data: {'id': code_id},
+                data: {'id': code_id, 'input': code_input},
                 success: function(response){
                     console.log(response);
-                    $(".output").show();
                     $(".output").html(response);
                 },
                 error: function(error){
-                    $(".error-output").show();
-                    $(".erorr-output").html(error);
+                    $(".output").html(error);
                 }
              });
+        }
+
+        function deleteCode(code_id){
+
         }
 
         function share(code_id){
