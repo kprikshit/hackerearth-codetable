@@ -1,4 +1,17 @@
-## How to run this application<br/>
+## CodeTable
+A custom implmentation of HackerEarth's tool CodeTable (https://code.hackerearth.com)
+This is capable of compiling and saving the code on server side and running it using HackerEarth's API
+(https://www.hackerearth.com/docs/api/developers/code/v3/)
+
+
+### Features
+1. Auto Code Saving
+2. Online Compile and Run
+3. Custom Test Input 
+4. Share code
+5. Multi Language Support (C,C++, C++11, PYTHON, JAVA, JAVASCRIPT, PHP, RUBY)
+
+### How to run this application<br/>
 ```python
 python manage.py makemigrations editor
 python manage.py migrate
