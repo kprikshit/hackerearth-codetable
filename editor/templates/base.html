@@ -1,24 +1,22 @@
 <html>
 {% load staticfiles %}
     <head>
-        <!-- Latest compiled and minified CSS  Bootstrap
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-        -->
+        <!-- Some Java script and css files -->
         <link rel="stylesheet" href="{% static "style.css" %}">
+        <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet' type='text/css'>
+        <title>{{file_name }}-Codetable Test</title>
     </head>
     <body>
         <div class="header">
             <div class="navigation">
                 <div class="float-left">
                     <div class="float-left">
-                        <a href="/" class="logo-codetable" class="logo-codetable no-underline float-left">CodeTable Test </a>
+                        <a href="/" class="logo-codetable no-underline float-left">CodeTable Test </a>
                     </div>
                     <div class="clear"></div>
                 </div>
                 <ul class="nav-bar no-padding float-right">
                     <li><a href="/">New Code</a></li>
-                    <li><a href="/" target="_blank">Do Something</a></li>
-                    <li><a href="/" target="_blank">FU</a></li>
                  </ul>
                  <div class="clear"></div>
             </div>
@@ -28,16 +26,18 @@
             <div class="filename-bar">
                 <div id="file-name" class="filename float-left" onclick="showFileRename()" title="Click to rename">{{ file_name }}</div>
                 <div class="filename-text float-left hidden">
+                    <div class="hidden" id="codeiddiv">{{ file_name }}</div>
+                    <div class="hidden" id="codeidlang">{{ code_lang }}</div>
                     <form>
                         <div class="floating-wrapper">
-                            <input type="text" id="file-name-value" name="filename" value=""></input>
+                            <input type="text" id="file-name-value" name="filename" value=""/>
                             <button onclick="saveFileName('{{ file_name }}')" type="button" id="file-name-save-btn" class="filename-save button btn-blue medium-margin-left">Save</button>
                             <a id="file-name-cancel-btn" onclick="hideFileRename()" class="filename-cancel link-3 medium-margin-left link-near-button">Cancel</a>
                         </div>
                     </form>
                 </div>
                 <div class="float-right less-margin-left delete-digest-code">
-                    <a onclick="delete_digest_code('{{ file_name }}'); return false;" class="delete">Delete</a>
+                    <a onclick="delete_code('{{ file_name }}'); return false;" class="delete">Delete</a>
                 </div>
                 <div class="clear"></div>
             </div><!-- filename div -->
@@ -47,47 +47,91 @@
                 <div class="editor-container">
                     <div class="editor-extras">
                         <div class="float-left select-lang">
-                            <select onchange="languageChange(this.value)" name="lang" id="lang">
+                            <select onchange="changeMode(this.value, true)" name="lang" id="lang">
                                 <option value="C" >C (gcc 4.8.4)</option>
                                 <option value="CPP" selected="selected">C++ (g++ 4.8.4)</option>
                                 <option value="CPP11" >C++11 (g++ 4.8.4)</option>
-                                <option value="CSHARP">C# (mono 3.2.8)</option>
                                 <option value="JAVASCRIPT">JavaScript</option>
                                 <option value="JAVA">Java (openjdk 1.7.0_09)</option>
                                 <option value="PERL">Perl (perl 5.18.2)</option>
                                 <option value="PHP">PHP (php 5.5.9)</option>
                                 <option value="PYTHON">Python (python 2.7.6)</option>
                                 <option value="RUBY">Ruby (ruby 2.1.1)</option>
-                                <option value="TEXTFILE">Text</option>
+                                <option value="TEXT">Text</option>
                             </select>
                         </div><!-- select-lang-->
-                        <div class="float-right btn-blue" id="save-code" onclick="saveCode()">Save</div>
+                        <div class="float-right btn-blue" id="save-code" onclick="saveCode('{{ file_name }}')">Save</div>
+                        <!--<button class="float-right btn-blue" id="save-code" onclick="saveCode('{{ file_name }}')">Save</button>-->
                         <div class="clear"></div>
                     </div><!-- editor-extras -->
-                    <div id="editor">
-                    </div><!--Editor-div -->
+                    <div id="editor">{{ code_text }}</div><!--Editor-div -->
                 </div><!-- editor-container -->
+
                 <div class="test-input-check medium-margin">
-                    <input onchange="showInputTextarea()" name="test-input-checkbox" id="test-input-checkbox" type="checkbox">
-                    <span onclick="textInputSpanClick()" class="test-input-checkbox-text body-font light">Use custom input for testing your code</span>
+                    <input onchange="showInputTextArea()" name="test-input-checkbox" id="test-input-checkbox" type="checkbox">
+                    <span onclick="textInputSpanClick()" class="test-input-checkbox-text light">Use custom input for testing your code</span>
                     <div class="test-input-container medium-margin hidden">
-                        <textarea id="test-input" class="nice-textarea" placeholder="Write your inputs to program.."></textarea>
+                        <textarea id="test-input" class="test-input-textarea" placeholder="Write your inputs to program.."></textarea>
                     </div>
-                    <hr class="hr">
+                    <hr class="gray-hr">
                 </div><!-- test-input-check-->
+
                 <div class="compile-and-test">
                     <div class="float-right medium-margin-left">
-                        <button type="button" id="run-code" class="button btn-green" onclick="compileAndRun('{{ file_name }}')">Compile and Run</button>
+                        <div class="generate-public-url button btn-green float-left" id="run-code" onclick="saveCompileRun('{{ file_name }}')"> Compile and Run </div>
+                        <!--<button type="button" id="run-code" class="button btn-green" onclick="saveCompileRun('{{ file_name }}')">Compile and Run</button>-->
                     </div>
                     <div class="clear"></div>
                 </div> <!-- compile and test -->
-                <div class="dots-loader"></div>
-                <div id="run-result" class="medium-margin body-font">
-                    <div class="error-output"></div>
-                    <div class="output hidden" id="output">
-                    </div>
+
+                <div class="border-div medium-margin hidden" id="compiling">
+                    <div class="compiling-inner">Compiling....</div>
                 </div>
-            </div><!-- left -->
+
+                <div class="border-div medium-margin hidden" id="error">
+                    <div class="error-inner">
+                        <div class='output-heading-bold'>
+                            <div style='display:inline'>Status:</div>
+                            <div style='display:inline' id="error-status"></div>
+                        </div>
+                    </div>
+                </div><!-- error-div-->
+
+                <div class='border-div medium-margin hidden' id="output">
+                    <div class="output-inner">
+                        <div class='output-heading-bold'>
+                            <div style='display:inline'>Compile Status:</div>
+                            <div style='display:inline' id="output-compile-status"></div>
+                        </div>
+                        <div class='medium-margin'>
+                            <div class='output-heading-bold'>Input:</div><hr/>
+                            <div id='output-input-value' class='light less-margin'></div>
+                        </div>
+                        <div class='medium-margin'>
+                            <div class='output-heading-bold'>Output:</div><hr/>
+                            <div id='output-output-value' class='dark less-margin'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Memory Used(KB):</div>
+                            <div id='output-memory-used-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Time taken (sec):</div>
+                            <div id='output-time-used-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Status:</div>
+                            <div id='output-status-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Status Detail:</div>
+                            <div id='output-status-detail-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='clear'></div>
+                    </div>
+                </div><!-- output-->
+
+            </div> <!-- left -->
             
             <div class="right">
                 <!-- activity status -->
@@ -100,21 +144,21 @@
                             <span class="date-created-value dark">{{ code_create_date }}</span>
                         </div>
                         <div class="date-last-saved">
-                            <span class="date-last-saved-msg">Last Modified:</span>
-                            <span class="date-last-saved-value dark">{{ code_modifiy_date }}</span>
+                            <span class="date-last-saved-msg">Last Saved:</span>
+                            <span class="date-last-saved-value dark">{{ code_last_save_date }}</span>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Share URL -->
+                </div> <!--Activity-status -->
                 <div class="share-url standard-margin">
-                    <div class="right-panel-heading">Share URL</div>
-                    <hr class="hr">
+                    <div class="right-panel-heading">Share URL</div><hr class="hr">
                     <div class="clear"></div>
-                    <div class="generate-public-url button btn-blue float-left" onclick="share('{{ file_name }}'');return false;"> Generate Public url </div>
+                    <div class="generate-public-url button btn-blue float-left" onclick="share('{{ file_name }}');"> Get shareable url </div>
                     <div class="clear"></div>
-                </div>
-                
+
+                    <div id="share-url-class" class="share-link-display less-margin-2">
+                        <a href="{{ share_url }}" id="share-url-href" target="_blank" class="result-read-only-url hidden">{{ share_url }}</a>
+                    </div>
+                </div> <!-- Share-url -->
             </div> <!-- right -->
             
             <div class="clear"></div>
@@ -123,7 +167,7 @@
         <div class="footer">
             <ul class="footer-bar no-padding">
                 <li>
-                    <a href="#"" target="_blank" class="underline-hover">Prikshit Kumar</a>
+                    <a href="#" target="_blank" class="underline-hover">Prikshit Kumar</a>
                     <span class="separator">|</span>
                 </li>
                 <li>
@@ -131,149 +175,46 @@
                     <span class="separator">|</span>
                 </li>
                 <li>
-                     <a href="mailto:kprikshit22@gmail.com" class="underline-hover" target="_blank">Contact</a>
+                     <a href="mailto:kprikshit22+hc@gmail.com" class="underline-hover" target="_blank">Contact Me</a>
                 </li>
             </ul>
             <div class="social-buttons float-right">
-                <a href="https://twitter.com/prikshit22" class="twitter-follow-button" data-show-count="false">Twitter: @prikshit</a>
+                <a href="https://twitter.com/prikshit22" class="twitter-follow-button" data-show-count="false">Twitter: @prikshit22</a>
                 <div class="clear"></div>
             </div>
             <div class="clear"></div>
         </div><!-- Footer -->
     </body>
-    <script src="{% static "jqeury.min.js" %}"></script>
+
+    <!--  Javascript Files -->
+    <script src="{% static "jquery.min.js" %}"></script>
+    <script src="{% static "frontend.js" %}"></script>
+    <script src= "{% static "ajaxfunctions.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src= "{% static "src-noconflict/ace.js" %}"  type="text/javascript" charset="utf-8"></script>
     <script>
-        
-        // File name related functions
-        function showFileRename(){
-            $(".filename-text").show();
-            $("#file-name").hide();
-        }
-        function saveFileName(){
-            var nname =$("#file-name-value").val();
-            if(nname == ""){
-                nname= "Untitled File";
-            } 
-            $("#file-name").html(nname);
-            hideFileRename();
-        }
-        function hideFileRename(){
-            $(".filename-text").hide();
-            $("#file-name").show();
-        }
-        
-        // custom test Input related function
-        function showInputTextarea(){
-            var checked = $('#test-input-checkbox').is(":checked");
-            if(checked){
-                $(".test-input-container").show();
-            }
-            else{
-                $(".test-input-container").hide();
-            }
-        }
-        function textInputSpanClick(){
-            var checked = $('#test-input-checkbox').is(":checked");
-            if(checked){
-                $(".test-input-container").hide();
-                $('#test-input-checkbox').prop('checked', false);
-            }
-            else{
-                $(".test-input-container").show();
-                $('#test-input-checkbox').prop('checked', true);
-            }
-        }
-        function saveCode(){
-            var editor = ace.edit("editor");
-            console.log(editor.session.getValue());
-            var modes = editor.session.getMode().$id.split("/");
-            var lang = modes[modes.length-1];
-            console.log(lang);
-            var lang = $("#lang").val();console.log(lang);
-        }
-        
-        function compileAndRun(){
-            var editor = ace.edit("editor");
-            var data = editor.getValue();
-            var modes = editor.session.getMode().$id.split("/");
-            var lang = $("#lang").val();
-            
-            $.getJSON({
-                type: 'POST',
-                dataType: 'json',
-                url: 'https://api.hackerearth.com/v3/code/run/',
-                data: {'client_secret': 'f8c321f549d832c1be38f82f0a26defc886cd079', 'source': data, 'lang': lang },
-                success: function(response){
-                    console.log(response);
-                    $("#output").html($.parseJSON(response).html);
-                },
-                error: function(error){
-                    $(".error-output").show();
-                    $(".erorr-output").html(error);
-                }
-             })
-            
-        }
-        
         $(document).ready(function(){
-            languageChange($("#lang").val());
-        })
-    </script>
-    <!-- Ace editor scripts -->
-    <script>
-        function languageChange(value){
+            self.setInterval(function(){
+                saveCode('{{ file_name }}');
+                $("#save-code").text("Saved!")
+            }, 10000);
+
             var editor = ace.edit("editor");
-            if(value=="C"){
-                editor.session.setMode("ace/mode/c_cpp");
-                editor.setValue('#include <stdio.h>\n\nint main(){\n\tprintf("%s", "Hello World!");\n\treturn 1;\n}');
+            editor.setTheme("ace/theme/github");
+
+            editor.on('change', function(){
+                $("#save-code").text("Save");
+                $("#save-code").css("background-color", "#4c9cdf");
+            });
+
+            changeMode("{{ code_lang }}", false);
+            $("#lang").val("{{ code_lang }}");
+            if("{{ shared }}" == "True"){
+                $("a#share-url-href").attr("href", "{{ shared_url }}");
+                $("a#share-url-href").text("{{ shared_url }}");
+                $("#share-url-href").show();
             }
-            else if(value=="CPP"){
-                editor.session.setMode("ace/mode/c_cpp");
-                editor.setValue('#include<iostream>\nusing namespace std;\n\nint main(){\n\tcout << "Hello World!!!" << endl;\n\treturn 0;\n}');
-            }
-            else if(value=="CPP11"){
-                editor.session.setMode("ace/mode/c_cpp");
-                editor.setValue('#include<iostream>\nusing namespace std;\n\nint main(){\n\tcout << "Hello World!!!" << endl;\n\treturn 0;\n}');
-            }
-            else if(value=="CSHARP"){
-                editor.session.setMode("ace/mode/csharp");
-                editor.session.setValue("This is a text");
-            }
-            else if(value=="JAVA"){
-                editor.session.setMode("ace/mode/java");
-                editor.session.setValue("class TestClass {\n\tpublic static void main(String args[] ) throws Exception {\n\t\tSystem.out.println('Hello World!');\n\t}\n}");
-            }
-            else if(value=="JAVSCRIPT"){
-                editor.session.setMode("ace/mode/javascript");
-                editor.session.setValue("This is a text");
-            }
-            else if(value=="PERL"){
-                editor.session.setMode("ace/mode/perl");
-                editor.session.setValue("This is a text");
-            }
-            else if(value=="PHP"){
-                editor.session.setMode("ace/mode/php");
-                editor.session.setValue('<?php\necho "Hello World!";\n?>');
-            }
-            else if(value=="PYTHON"){
-                editor.session.setMode("ace/mode/python");
-                editor.session.setValue("print 'Hello World!'");
-            }
-            else if(value=="RUBY"){
-                editor.session.setMode("ace/mode/ruby");
-                editor.session.setValue("This is a text");
-            }
-            else{
-                editor.session.setMode("ace/mode/text");
-                editor.session.setValue("This is a text");
-            }
-        }    
-    </script>
-    <script src= "{% static "src-noconflict/ace.js" %}" charset="utf-8"></script>
-    <script>
-        var editor = ace.edit("editor");
-        editor.setTheme("ace/theme/twilight");
-        editor.session.setMode("ace/mode/c_cpp");
-    </script>
+        })
+    </script> <!-- ACE Editor JS -->
+
 </html>
 
