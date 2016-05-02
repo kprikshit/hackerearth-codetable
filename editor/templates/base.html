@@ -1,10 +1,9 @@
 <html>
 {% load staticfiles %}
     <head>
-        <!-- Latest compiled and minified CSS  Bootstrap
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-        -->
+        <!-- Some Java script and css files -->
         <link rel="stylesheet" href="{% static "style.css" %}">
+        <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet' type='text/css'>
         <title>{{file_name }}-Codetable Test</title>
     </head>
     <body>
@@ -12,16 +11,12 @@
             <div class="navigation">
                 <div class="float-left">
                     <div class="float-left">
-                        <a href="/" class="logo-codetable" class="logo-codetable no-underline float-left">CodeTable Test </a>
+                        <a href="/" class="logo-codetable no-underline float-left">CodeTable Test </a>
                     </div>
                     <div class="clear"></div>
                 </div>
                 <ul class="nav-bar no-padding float-right">
                     <li><a href="/">New Code</a></li>
-                    <!--
-                    <li><a href="/" target="_blank">Do Something</a></li>
-                    <li><a href="/" target="_blank">FU</a></li>
-                    -->
                  </ul>
                  <div class="clear"></div>
             </div>
@@ -65,31 +60,78 @@
                                 <option value="TEXT">Text</option>
                             </select>
                         </div><!-- select-lang-->
-
-                        <button class="float-right btn-blue" id="save-code" onclick="saveCode('{{ file_name }}')">Save</button>
+                        <div class="float-right btn-blue" id="save-code" onclick="saveCode('{{ file_name }}')">Save</div>
+                        <!--<button class="float-right btn-blue" id="save-code" onclick="saveCode('{{ file_name }}')">Save</button>-->
                         <div class="clear"></div>
                     </div><!-- editor-extras -->
                     <div id="editor">{{ code_text }}</div><!--Editor-div -->
                 </div><!-- editor-container -->
+
                 <div class="test-input-check medium-margin">
-                    <input onchange="showInputTextarea()" name="test-input-checkbox" id="test-input-checkbox" type="checkbox">
-                    <span onclick="textInputSpanClick()" class="test-input-checkbox-text body-font light">Use custom input for testing your code</span>
+                    <input onchange="showInputTextArea()" name="test-input-checkbox" id="test-input-checkbox" type="checkbox">
+                    <span onclick="textInputSpanClick()" class="test-input-checkbox-text light">Use custom input for testing your code</span>
                     <div class="test-input-container medium-margin hidden">
-                        <textarea id="test-input" class="nice-textarea" placeholder="Write your inputs to program.."></textarea>
+                        <textarea id="test-input" class="test-input-textarea" placeholder="Write your inputs to program.."></textarea>
                     </div>
-                    <hr class="hr">
+                    <hr class="gray-hr">
                 </div><!-- test-input-check-->
+
                 <div class="compile-and-test">
                     <div class="float-right medium-margin-left">
-                        <button type="button" id="run-code" class="button btn-green" onclick="saveCompileRun('{{ file_name }}')">Compile and Run</button>
+                        <div class="generate-public-url button btn-green float-left" id="run-code" onclick="saveCompileRun('{{ file_name }}')"> Compile and Run </div>
+                        <!--<button type="button" id="run-code" class="button btn-green" onclick="saveCompileRun('{{ file_name }}')">Compile and Run</button>-->
                     </div>
                     <div class="clear"></div>
                 </div> <!-- compile and test -->
-                <div id="run-result" class="medium-margin body-font hidden">
-                    <div class="error-output"></div>
-                    <div class="output" id="output"></div>
+
+                <div class="border-div medium-margin hidden" id="compiling">
+                    <div class="compiling-inner">Compiling....</div>
                 </div>
-            </div><!-- left -->
+
+                <div class="border-div medium-margin hidden" id="error">
+                    <div class="error-inner">
+                        <div class='output-heading-bold'>
+                            <div style='display:inline'>Status:</div>
+                            <div style='display:inline' id="error-status"></div>
+                        </div>
+                    </div>
+                </div><!-- error-div-->
+
+                <div class='border-div medium-margin hidden' id="output">
+                    <div class="output-inner">
+                        <div class='output-heading-bold'>
+                            <div style='display:inline'>Compile Status:</div>
+                            <div style='display:inline' id="output-compile-status"></div>
+                        </div>
+                        <div class='medium-margin'>
+                            <div class='output-heading-bold'>Input:</div><hr/>
+                            <div id='output-input-value' class='light less-margin'></div>
+                        </div>
+                        <div class='medium-margin'>
+                            <div class='output-heading-bold'>Output:</div><hr/>
+                            <div id='output-output-value' class='dark less-margin'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Memory Used(KB):</div>
+                            <div id='output-memory-used-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Time taken (sec):</div>
+                            <div id='output-time-used-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Status:</div>
+                            <div id='output-status-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='float-left output-col'>
+                            <div class='output-heading-bold'>Status Detail:</div>
+                            <div id='output-status-detail-value' class='less-margin dark'></div>
+                        </div>
+                        <div class='clear'></div>
+                    </div>
+                </div><!-- output-->
+
+            </div> <!-- left -->
             
             <div class="right">
                 <!-- activity status -->
@@ -106,12 +148,9 @@
                             <span class="date-last-saved-value dark">{{ code_last_save_date }}</span>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Share URL -->
+                </div> <!--Activity-status -->
                 <div class="share-url standard-margin">
-                    <div class="right-panel-heading">Share URL</div>
-                    <hr class="hr">
+                    <div class="right-panel-heading">Share URL</div><hr class="hr">
                     <div class="clear"></div>
                     <div class="generate-public-url button btn-blue float-left" onclick="share('{{ file_name }}');"> Get shareable url </div>
                     <div class="clear"></div>
@@ -119,8 +158,7 @@
                     <div id="share-url-class" class="share-link-display less-margin-2">
                         <a href="{{ share_url }}" id="share-url-href" target="_blank" class="result-read-only-url hidden">{{ share_url }}</a>
                     </div>
-                </div>
-                
+                </div> <!-- Share-url -->
             </div> <!-- right -->
             
             <div class="clear"></div>
@@ -137,156 +175,21 @@
                     <span class="separator">|</span>
                 </li>
                 <li>
-                     <a href="mailto:kprikshit22@gmail.com" class="underline-hover" target="_blank">Contact</a>
+                     <a href="mailto:kprikshit22+hc@gmail.com" class="underline-hover" target="_blank">Contact Me</a>
                 </li>
             </ul>
             <div class="social-buttons float-right">
-                <a href="https://twitter.com/prikshit22" class="twitter-follow-button" data-show-count="false">Twitter: @prikshit</a>
+                <a href="https://twitter.com/prikshit22" class="twitter-follow-button" data-show-count="false">Twitter: @prikshit22</a>
                 <div class="clear"></div>
             </div>
             <div class="clear"></div>
         </div><!-- Footer -->
     </body>
 
-
-    <!-- Various JS Files -->
-    <!-- Loading these at end for faster page rendering  -->
+    <!--  Javascript Files -->
     <script src="{% static "jquery.min.js" %}"></script>
-
-    <!-- Frontend related functions -->
-    <script>
-        // File name related functions
-        function showFileRename(){
-            $(".filename-text").show();
-            $("#file-name").hide();
-        }
-
-        function saveFileName(){
-            var nname =$("#file-name-value").val();
-            if(nname == ""){
-                nname= "Untitled File";
-            } 
-            $("#file-name").html(nname);
-            hideFileRename();
-        }
-
-        function hideFileRename(){
-            $(".filename-text").hide();
-            $("#file-name").show();
-        }
-        // custom test Input related function
-        function showInputTextarea(){
-            var checked = $('#test-input-checkbox').is(":checked");
-            if(checked){
-                $(".test-input-container").show();
-            }
-            else{
-                $(".test-input-container").hide();
-            }
-        }
-
-        function textInputSpanClick(){
-            var checked = $('#test-input-checkbox').is(":checked");
-            if(checked){
-                $(".test-input-container").hide();
-                $('#test-input-checkbox').prop('checked', false);
-            }
-            else{
-                $(".test-input-container").show();
-                $('#test-input-checkbox').prop('checked', true);
-            }
-        }
-    </script> <!--Frontend scripts -->
-
-    <!-- ajax related functions -->
-    <script>
-        function saveCode(code_id){
-            $("#save-code").text("Saving...");
-            var editor = ace.edit("editor");
-            var code_text = editor.session.getValue();
-            var code_lang = $("#lang").val();
-            $.post({
-                type :'POST',
-                url: '/editor/save/',
-                data: {'lang': code_lang, 'text': code_text, 'id': code_id},
-                success: function(response){
-                    $(".date-last-saved-value").html(new Date(response));
-                    $("#save-code").text("Saved!");
-                    $("#save-code").css("background-color", "green");
-                },
-                error: function(error){
-                    console.log(error);
-                }
-            })
-        }
-
-        // this will save the code first and then it will run it
-        function saveCompileRun(code_id) {
-            while (1) {
-                saveCode(code_id);
-                break;
-            }
-            compileAndRun(code_id);
-        }
-
-        function compileAndRun(code_id){
-            $("#run-result").show();
-            $(".output").html("Compiling....")
-            var code_input = $("#test-input").val();
-            console.log(code_input);
-            $.ajax({
-                method: 'POST',
-                url: '/editor/run/',
-                data: {'id': code_id, 'input': code_input},
-                success: function(response){
-                    console.log(response);
-                    $(".output").html(response);
-                },
-                error: function(error){
-                    $(".output").html(error);
-                }
-             });
-        }
-
-        function deleteCode(code_id){
-
-        }
-
-        function share(code_id){
-            $.ajax({
-                type: 'POST',
-                data: {'code_id': code_id},
-                url: '/editor/generate/',
-                success: function(response){
-                    $("a#share-url-href").attr("href", response);
-                    $("a#share-url-href").text(response);
-                    $("#share-url-href").show();
-                },
-                error: function(error){
-                    $("a#share-url-href").text(response);
-                    $("#share-url-href").show();
-                }
-             })
-        }
-
-        function fetch_default_code(new_lang){
-            var editor = ace.edit("editor");
-            var code_id = $("#codeiddiv").html();
-            $.post({
-                type :'POST',
-                url: '/editor/starter/',
-                data: {'lang': new_lang},
-                success: function(response){
-                    editor.session.setValue(response);
-                },
-                error: function(error){
-                    console.log(error);
-                }
-            })
-        }
-    </script><!-- Ajax scripts -->
-
-    <!-- Ace editor scripts -->
+    <script src="{% static "frontend.js" %}"></script>
+    <script src= "{% static "ajaxfunctions.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src= "{% static "src-noconflict/ace.js" %}"  type="text/javascript" charset="utf-8"></script>
     <script>
         $(document).ready(function(){
@@ -297,10 +200,6 @@
 
             var editor = ace.edit("editor");
             editor.setTheme("ace/theme/github");
-            editor.getSession().setTabSize(1);
-            //editor.getSession().setUseSoftTabs(false);
-
-            //$("#editor").css('font-family', 'Courier New');
 
             editor.on('change', function(){
                 $("#save-code").text("Save");
@@ -315,39 +214,6 @@
                 $("#share-url-href").show();
             }
         })
-
-        // this function changes the mode of ACE editor when user changes the langauge
-        // this will also fetch a new template from the server
-        function changeMode(new_lang, fetchCode){
-            var editor = ace.edit("editor");
-
-            if(new_lang == "C")
-                editor.session.setMode("ace/mode/c_cpp");
-            else if(new_lang == "CPP")
-                editor.session.setMode("ace/mode/c_cpp");
-            else if(new_lang == "CPP11")
-                editor.session.setMode("ace/mode/c_cpp");
-            else if(new_lang == "JAVA")
-                editor.session.setMode("ace/mode/java");
-            else if(new_lang == "JAVASCRIPT")
-                editor.session.setMode("ace/mode/javascript");
-            else if(new_lang == "PERL")
-                editor.session.setMode("ace/mode/perl");
-            else if(new_lang == "PYTHON")
-                editor.session.setMode("ace/mode/python");
-            else if(new_lang == "PHP")
-                editor.session.setMode("ace/mode/php");
-            else if(new_lang == "RUBY")
-                editor.session.setMode("ace/mode/ruby");
-            else
-                editor.session.setMode("ace/mode/text");
-            // fetch a new starter code from server
-            if(fetchCode){
-                fetch_default_code(new_lang);
-            }
-        }
-
-
     </script> <!-- ACE Editor JS -->
 
 </html>

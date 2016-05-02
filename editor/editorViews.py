@@ -171,54 +171,15 @@ def save(request):
         print ex
         return HttpResponse("error in saving file")
 
+def input_to_html(code_input):
+    input = code_input;
+    if input == "":
+        input = "Std input is empty"
+    else:
+        input = string.replace(input, "\n", "<br/>")
+        input = string.replace(input, "\t", "&nbsp;")
+    return input
 
-def generate_output_html(response, code_input):
-    htmlres = "<div style='display:inline' class='content-heading-bold'>Compile Status: &nbsp;</div>"
-    htmlres = htmlres + response['compile_status'] + ""
-
-    compile_status = response['compile_status']
-    if compile_status == "OK":
-        # add run information
-        htmlres = htmlres + "<div class='medium-margin'><div class='content-heading-bold'>Input:</div><hr/>"
-        if code_input == "":
-            htmlres = htmlres + "<div class='light less-margin'>" + "Std Input is Empty"
-        else:
-            code_input = string.replace(code_input, "\n", "<br/>")
-            htmlres = htmlres + "<div class='dark less-margin'>" + code_input
-        htmlres = htmlres + "</div></div>"
-
-        # added run output
-        htmlres = htmlres + "<div class='medium-margin'><div class='content-heading-bold'>Output:</div><hr/>"
-        code_output = response['run_status']['output_html']
-        if code_output == "":
-            htmlres =  htmlres + "<div class='light less-margin'>" + "Std Output is Empty"
-        else:
-            htmlres = htmlres + "<div class='dark less-margin'>" + code_output
-        htmlres = htmlres + "</div></div>"
-
-        # added run memory information
-        htmlres = htmlres + "<div class='float-left col'>"
-        htmlres = htmlres + "<div class='content-heading-bold'>Memory Used(KB):</div>"
-        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
-            'memory_used'] + "</div></div>"
-
-        htmlres = htmlres + "<div class='float-left col'>"
-        htmlres = htmlres + "<div class='content-heading-bold'>Time taken (sec):</div>"
-        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
-            'time_used'] + "</div></div>"
-
-        htmlres = htmlres + "<div class='float-left col'>"
-        htmlres = htmlres + "<div class='content-heading-bold'>Status:</div>"
-        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
-            'status'] + "</div></div>"
-
-        htmlres = htmlres + "<div class='float-left col'>"
-        htmlres = htmlres + "<div class='content-heading-bold'>Status Detail:</div>"
-        htmlres = htmlres + "<div class='less-margin bpdy-font dark'>" + response['run_status'][
-            'status_detail'] + "</div></div>"
-
-        htmlres = htmlres + "<div class='clear'></div>"
-    return htmlres
 
 @csrf_exempt
 def compile_run(request):
@@ -239,6 +200,23 @@ def compile_run(request):
 
     # Make the API request here
     response = requests.post(API_RUN_URL, data = data).json()
-    # convert received json to a HTML format
-    output_html = generate_output_html(response, code_input)
-    return HttpResponse(output_html)
+
+    # return the required run data only
+    run_data = {}
+    run_data['compile_status'] = response['compile_status']
+    if response['compile_status'] == "OK":
+        run_data['output'] = response['run_status']['output_html']
+        run_data['input'] = input_to_html(code_input)
+
+        # transform empty input/output
+        if run_data['output'] == "":
+            run_data['output'] = "Std output is empty"
+
+        run_data['memory_used'] = response['run_status']['memory_used']
+        run_data['time_used'] = response['run_status']['time_used']
+        run_data['status'] = response['run_status']['status']
+        run_data['status_detail'] = response['run_status']['status_detail']
+        run_data['error'] = 0;
+    else:
+        run_data['error'] = 1;
+    return HttpResponse(json.dumps(run_data))
