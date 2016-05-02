@@ -1,8 +1,6 @@
 ## CodeTable
-A custom implmentation of HackerEarth's tool CodeTable (https://code.hackerearth.com)
-This is capable of compiling and saving the code on server side and running it using HackerEarth's API
-(https://www.hackerearth.com/docs/api/developers/code/v3/)
-
+A custom implmentation of HackerEarth's tool CodeTable (https://code.hackerearth.com)<br/>
+Code Compilation and Run occurs through HackerEarth's API (https://www.hackerearth.com/docs/api/developers/code/v3/)
 
 ### Features
 1. Auto Code Saving
@@ -10,6 +8,8 @@ This is capable of compiling and saving the code on server side and running it u
 3. Custom Test Input 
 4. Share code
 5. Multi Language Support (C,C++, C++11, PYTHON, JAVA, JAVASCRIPT, PHP, RUBY)
+
+This uses Python Django to run the app
 
 ### How to run this application<br/>
 ```python
