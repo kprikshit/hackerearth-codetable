@@ -25,3 +25,5 @@ urlpatterns = [
     url(r'^$', homeViews.home_redirect, name='HomePageRedirect'),
     url(r'^editor.', include('editor.urls')),
 ]
+
+admin.autodiscover()

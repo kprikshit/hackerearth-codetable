@@ -1,7 +1,7 @@
 ## How to run this application<br/>
 ```python
 python manage.py makemigrations editor
-python manage.py migrate editor
+python manage.py migrate
 ```
 ### create users for accessing admin website
 ```python
@@ -9,9 +9,9 @@ python manage.py shell
 from django.contrib.auth.models import User
 user=User.objects.create_user('admin', password='admin')
 user.is_active = True
-user.is_staff = True
 user.is_superuser = True
-user.is_authenticated = True
+user.is_staff = True
+user.save()
 ```
 
 ### Settings for accessing admin site
